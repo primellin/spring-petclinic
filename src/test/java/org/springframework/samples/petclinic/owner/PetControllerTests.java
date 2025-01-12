@@ -81,6 +81,41 @@ class PetControllerTests {
 	}
 
 	@Test
+	void testCreatePetWithNumeralName() throws Exception {
+		String type = "hamster";
+		String birthDate = "2023-02-12";
+		String uriTemplate = "/owners/{ownerId}/pets/new";
+		String ownerName = "145";
+
+		mockMvc
+			.perform(post(uriTemplate, TEST_OWNER_ID).param("name", ownerName)
+				.param("type", type)
+				.param("birthDate", birthDate))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("pet", "name"));
+	}
+
+	@Test
+	void testPetWithInvalidBirthDate() throws Exception {
+		LocalDate currentDate = LocalDate.now();
+		String invalidBirthDate = currentDate.minusYears(100).toString();
+		String uriTemplate = "/owners/{ownerId}/pets/new";
+		String petName = "Zoe";
+		String type = "hamster";
+
+		mockMvc
+			.perform(post(uriTemplate, TEST_OWNER_ID).param("name", petName)
+				.param("birthDate", invalidBirthDate)
+				.param("type", type))
+			.andExpect(model().attributeHasNoErrors("owner"))
+			.andExpect(model().attributeHasErrors("pet"))
+			.andExpect(model().attributeHasFieldErrors("pet", "birthDate"))
+			.andExpect(model().attributeHasFieldErrorCode("pet", "birthDate", "typeMismatch.birthDate"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("pets/createOrUpdatePetForm"));
+	}
+
+	@Test
 	void testInitCreationForm() throws Exception {
 		mockMvc.perform(get("/owners/{ownerId}/pets/new", TEST_OWNER_ID))
 			.andExpect(status().isOk())

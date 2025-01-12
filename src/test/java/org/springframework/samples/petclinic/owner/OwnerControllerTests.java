@@ -84,6 +84,10 @@ class OwnerControllerTests {
 		max.setBirthDate(LocalDate.now());
 		george.addPet(max);
 		max.setId(1);
+		Visit visit = new Visit();
+		visit.setDate(LocalDate.now());
+		visit.setDescription("desk");
+		george.addVisit(george.getPet("Max").getId(), visit);
 		return george;
 	}
 
@@ -101,6 +105,42 @@ class OwnerControllerTests {
 		visit.setDate(LocalDate.now());
 		george.getPet("Max").getVisits().add(visit);
 
+	}
+
+	@Test
+	void testCreateOwnerWithNumeralName() throws Exception {
+		String firstName = "123";
+		String lastName = "456";
+		String address = "123 Caramel Street";
+		String city = "London";
+		String telephone = "1316761638";
+
+		mockMvc
+			.perform(post("/owners/new").param("firstName", firstName)
+				.param("lastName", lastName)
+				.param("address", address)
+				.param("city", city)
+				.param("telephone", telephone))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("owner", "firstName", "lastName"));
+	}
+
+	@Test
+	void testCreateOwnerNotNumeralTelephone() throws Exception {
+		String firstName = "Joe";
+		String lastName = "Bloggs";
+		String address = "123 Caramel Street";
+		String city = "London";
+		String telephone = "phone";
+
+		mockMvc
+			.perform(post("/owners/new").param("firstName", firstName)
+				.param("lastName", lastName)
+				.param("address", address)
+				.param("city", city)
+				.param("telephone", telephone))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("owner", "telephone"));
 	}
 
 	@Test

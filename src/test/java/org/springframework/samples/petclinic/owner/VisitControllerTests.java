@@ -32,6 +32,7 @@ import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -73,12 +74,50 @@ class VisitControllerTests {
 
 	@Test
 	void testProcessNewVisitFormSuccess() throws Exception {
+		String uriTemplate = "/owners/{ownerId}/pets/{petId}/visits/new";
+		String name = "George";
+		String date = LocalDate.now().plusDays(1).toString();
+		String visitDescription = "Visit Description";
+
 		mockMvc
-			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
-				.param("name", "George")
-				.param("description", "Visit Description"))
+			.perform(post(uriTemplate, TEST_OWNER_ID, TEST_PET_ID)
+				.param("name", name)
+				.param("date", date)
+				.param("description", visitDescription))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	}
+
+	@Test
+	void testProcessNewVisitFormFailWithEmptyDate() throws Exception {
+		String uriTemplate = "/owners/{ownerId}/pets/{petId}/visits/new";
+		String name = "George";
+		String emptyDate = "";
+		String visitDescription = "Visit Description";
+
+		mockMvc
+			.perform(post(uriTemplate, TEST_OWNER_ID, TEST_PET_ID)
+				.param("name", name)
+				.param("date", emptyDate)
+				.param("description", visitDescription))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("visit", "date"));
+	}
+
+	@Test
+	void testProcessNewVisitFormInvalidDateFail() throws Exception {
+		String uriTemplate = "/owners/{ownerId}/pets/{petId}/visits/new";
+		String name = "George";
+		String invalidDate = LocalDate.now().minusDays(1).toString();
+		String visitDescription = "Visit Description";
+
+		mockMvc
+			.perform(post(uriTemplate, TEST_OWNER_ID, TEST_PET_ID)
+				.param("name", name)
+				.param("date", invalidDate)
+				.param("description", visitDescription))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("visit", "date"));
 	}
 
 	@Test

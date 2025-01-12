@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * Simple JavaBean domain object representing an person.
@@ -29,10 +30,12 @@ public class Person extends BaseEntity {
 
 	@Column(name = "first_name")
 	@NotBlank
+	@Pattern(regexp = "^([a-zA-Z]|[а-яА-Я]|-| )+$", message = "First name must contain only letters")
 	private String firstName;
 
 	@Column(name = "last_name")
 	@NotBlank
+	@Pattern(regexp = "^([a-zA-Z]|[а-яА-Я]|-| )+$", message = "Last name must contain only letters")
 	private String lastName;
 
 	public String getFirstName() {

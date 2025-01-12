@@ -57,4 +57,38 @@ class ValidatorTests {
 		assertThat(violation.getMessage()).isEqualTo("must not be blank");
 	}
 
+	@Test
+	void shouldNotValidateWhenFirstNameNumeral() {
+
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Person person = new Person();
+		person.setFirstName("33");
+		person.setLastName("Smith");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Person>> constraintViolations = validator.validate(person);
+
+		assertThat(constraintViolations).hasSize(1);
+		ConstraintViolation<Person> violation = constraintViolations.iterator().next();
+		assertThat(violation.getPropertyPath()).hasToString("firstName");
+		assertThat(violation.getMessage()).isEqualTo("First name must contain only letters");
+	}
+
+	@Test
+	void shouldNotValidateWhenLastNameNumeral() {
+
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Person person = new Person();
+		person.setFirstName("George");
+		person.setLastName("12");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Person>> constraintViolations = validator.validate(person);
+
+		assertThat(constraintViolations).hasSize(1);
+		ConstraintViolation<Person> violation = constraintViolations.iterator().next();
+		assertThat(violation.getPropertyPath()).hasToString("lastName");
+		assertThat(violation.getMessage()).isEqualTo("Last name must contain only letters");
+	}
+
 }
